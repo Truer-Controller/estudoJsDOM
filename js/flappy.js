@@ -101,6 +101,28 @@ function Progresso() {
     this.atualizarPontos(0)
 }
 
+function estaoSobre(elementoA,elementoB){
+    const a = elementoA.getBoundingClientRect()
+    const b = elementoB.getBoundingClientRect()
+
+    const hori = a.left + a.width >= b.left && b.left + b.width >= a.left
+    const vert = a.top + a.height >= b.top && b.top + b.height >= a.top
+    return hori && vert
+}
+
+function colisao(passaro, barreiras){
+    let colisao = false
+
+    barreiras.pares.forEach(PardeBarreiras  =>{
+        if(!colisao){
+            const superior = PardeBarreiras.superior.elemento
+            const inferiro = PardeBarreiras.inferiro.elemento
+            colisao = estaoSobre(passaro.elemento, superior) || estaoSobre(passaro.elemento, inferiro)
+        }
+    })
+    return colisao
+}
+
 function flappy(){
     let pontos = 0
 
@@ -113,17 +135,20 @@ function flappy(){
     const passaro = new Passaro(altura)
 
     areaDoJogo.appendChild(progresso.elemento)
-    areaDoJogo.appendChild(passaro.elemento)
+    areaDoJogo.appendChild(passaro.elemento)  
     barreiras.pares.forEach(par => areaDoJogo.appendChild(par.elemento))
 
     this.start = () =>{
         const temporizador = setInterval(()=>{
             barreiras.animar()
             passaro.animar()
+
+            if (colisao(passaro,barreiras)){
+                clearInterval(temporizador)
+            }
         }, 20)
     }
 }
-
 new flappy().start()
 
 
